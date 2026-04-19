@@ -269,8 +269,10 @@ class DT(Inverter):
         if is_4_mppt(self):
             pass
         elif is_3_mppt(self):
+            # This inverter does not have 4 MPPTs or PV strings
             self._sensors = tuple(filter(lambda s: not ("pv4" in s.id_), self._sensors))
         else:
+            # This inverter does not have 3,4 MPPTs or PV strings
             self._sensors = tuple(filter(lambda s: not ("pv4" in s.id_), self._sensors))
             self._sensors = tuple(filter(lambda s: not ("pv3" in s.id_), self._sensors))
 
@@ -290,6 +292,7 @@ class DT(Inverter):
             try:
                 response = await self._read_from_socket(self._READ_METER_DATA)
                 data.update(self._map_response(response, self._sensors_meter))
+                #patch house_consumption int from all_sensors_meter now that we have values available
                 data["house_consumption"] = abs(data.get("ppv", 0) - data.get("meter_active_power", 0))
             except (RequestRejectedException, RequestFailedException):
                 logger.info("Meter values not supported, disabling further attempts.")
@@ -347,6 +350,7 @@ class DT(Inverter):
 
     async def _write_setting(self, setting: Sensor, value: Any):
         if setting.size_ == 1:
+            # modbus can address/store only 16 bit values, read the other 8 bytes
             response = await self._read_from_socket(
                 self._read_command(setting.offset, 1)
             )
