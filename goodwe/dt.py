@@ -191,6 +191,9 @@ class DT(Inverter):
         Integer(
             "grid_export_hw", 40345, "Grid Export Limit Enabled (HW)", "", Kind.GRID
         ),
+        Integer(
+            "active_power_limit", 40480, "Active Power Limit", "%", Kind.AC
+        ),
     )
 
     # Settings for single phase inverters
